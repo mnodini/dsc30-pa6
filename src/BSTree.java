@@ -188,6 +188,7 @@ public class BSTree<T extends Comparable<? super T>> implements Iterable {
         //When tree is empty
         if(this.root == null){
             this.root = new BSTNode(null, null, key);
+            this.nelems += 1;
             return true;
         }
         else{
@@ -262,8 +263,11 @@ public class BSTree<T extends Comparable<? super T>> implements Iterable {
         if(this.nelems == 0){
             return -1;
         }
-        else{
+        else if(this.nelems == 1){
             return 0;
+        }
+        else{
+            return findHeightHelper(this.root);
         }
     }
 
@@ -274,8 +278,20 @@ public class BSTree<T extends Comparable<? super T>> implements Iterable {
      * @return The height of the tree, -1 if BST is empty
      */
     private int findHeightHelper(BSTNode root) {
-        /* TODO */
-        return -1;
+        if(root == null){
+            return -1;
+        }
+        else{
+            int leftHeight = findHeightHelper(root.getLeft());
+            int rightHeight = findHeightHelper(root.getRight());
+
+            if(leftHeight > rightHeight){
+                return leftHeight+1;
+            }
+            else{
+                return rightHeight+1;
+            }
+        }
     }
 
     /**
@@ -306,6 +322,7 @@ public class BSTree<T extends Comparable<? super T>> implements Iterable {
                 addHelper(currRoot.getRight(), toAdd);
             }
         }
+        this.nelems += 1;
         return true;
     }
 
@@ -318,7 +335,7 @@ public class BSTree<T extends Comparable<? super T>> implements Iterable {
         //In order traversal through tree
         if(node != null){
             findHelper(node.left, toFind);
-            if(node.key.equals(toFind)){
+            if(node.getKey().equals(toFind)){
                 return true;
             }
             findHelper(node.right, toFind);

@@ -224,12 +224,14 @@ public class BSTree<T extends Comparable<? super T>> implements Iterable {
         if(key == null || data == null){
             throw new NullPointerException();
         }
-        BSTNode node = findHelperNode(this.root, key);
+        //Check if node is inTree
+        boolean inTree = findHelper(this.root,key);
         //If key is not in tree
-        if(node == null){
+        if(inTree == false){
             throw new IllegalArgumentException();
         }
         else{
+            BSTNode node = findHelperNode(this.root, key);
             node.addNewInfo(data);
         }
     }
@@ -306,20 +308,22 @@ public class BSTree<T extends Comparable<? super T>> implements Iterable {
         if(val == 0){
             return false;
         }
+        //If less check left
         else if(val < 0){
             if(currRoot.getLeft() == null){
                 currRoot.setleft(new BSTNode(null, null, toAdd));
             }
             else{
-                addHelper(currRoot.getLeft(), toAdd);
+                return addHelper(currRoot.getLeft(), toAdd);
             }
         }
+        //If greater check right
         else{
             if(currRoot.getRight() == null){
                 currRoot.setright(new BSTNode(null, null, toAdd));
             }
             else{
-                addHelper(currRoot.getRight(), toAdd);
+                return addHelper(currRoot.getRight(), toAdd);
             }
         }
         this.nelems += 1;
@@ -332,16 +336,19 @@ public class BSTree<T extends Comparable<? super T>> implements Iterable {
      * @return true if found
      */
     private boolean findHelper(BSTNode node,T toFind){
-        //In order traversal through tree
-        if(node != null){
-            findHelper(node.left, toFind);
-            if(node.getKey().equals(toFind)){
-                return true;
-            }
-            findHelper(node.right, toFind);
+        if(node == null){
+            return false;
         }
-        //If key is never found
-        return false;
+        else if(node.getKey().equals(toFind)){
+            return true;
+        }
+        //Check both sides of tree
+        boolean r1 = findHelper(node.left, toFind);
+        if(r1){
+            return true;
+        }
+        boolean r2 = findHelper(node.right, toFind);
+        return r2;
     }
 
     /**
@@ -350,46 +357,97 @@ public class BSTree<T extends Comparable<? super T>> implements Iterable {
      * @return Node who's key is equal to toFind
      */
     private BSTNode findHelperNode(BSTNode node,T toFind){
-        //In order traversal through tree
-        if(node != null){
-            findHelperNode(node.left, toFind);
-            if(node.key.equals(toFind)){
-                return node;
-            }
-            findHelperNode(node.right, toFind);
+        if(node == null){
+            return null;
         }
-        //If key is never found
-        return null;
+        else if(node.getKey().equals(toFind)){
+            return node;
+        }
+        //Check both sides of tree
+        BSTNode r1 = findHelperNode(node.left, toFind);
+        if(r1 != null && r1.getKey().equals(toFind)){
+            return r1;
+        }
+        BSTNode r2 = findHelperNode(node.right, toFind);
+        return r2;
     }
 
     /* * * * * BST Iterator * * * * */
 
     public class BSTree_Iterator implements Iterator<T> {
+
+        Stack<BSTNode> stack;
+
+        /**
+         * Constructor for BSTree_Iterator
+         * Initializes stack with leftmost path of tree
+         */
         public BSTree_Iterator() {
-            /* TODO */
+            this.stack = new Stack<>();
+            BSTNode node = root;
+            while(node != null){
+                //Push the node onto stack
+                this.stack.push(node);
+                //Set node to currNode left child
+                node = node.getLeft();
+            }
         }
 
+        /**
+         * Checks if there is another value in iterator
+         * @return false if stack is empty, true otherwise
+         */
         public boolean hasNext() {
-            /* TODO */
-            return false;
+            return !this.stack.isEmpty();
         }
 
         public T next() {
-            /* TODO */
-            return null;
+            //If there is no next element
+            if(!this.hasNext()){
+                throw new NoSuchElementException();
+            }
+            //If there is an element
+            else{
+                //Pop the next node of the stack and get val
+                BSTNode popped = this.stack.pop();
+                T rVal = popped.getKey();
+                //Check if node has any right child
+                if(popped.getRight() != null){
+                    //Setup right node to be added
+                    BSTNode currNode = popped.getRight();
+                    //Add left path to stack
+                    while(currNode != null){
+                        this.stack.push(currNode);
+                        currNode = currNode.getLeft();
+                    }
+                }
+                return rVal;
+            }
         }
     }
 
     public Iterator<T> iterator() {
-        /* TODO */
-        return null;
+        return new BSTree_Iterator();
     }
 
     /* * * * * Extra Credit Methods * * * * */
 
     public ArrayList<T> intersection(Iterator<T> iter1, Iterator<T> iter2) {
-        /* TODO */
-        return null;
+        ArrayList<T> tree1 = new ArrayList<>();
+        ArrayList<T> tree2 = new ArrayList<>();
+        ArrayList<T> r = new ArrayList<>();
+        while(iter1.hasNext()){
+            tree1.add(iter1.next());
+        }
+        while(iter2.hasNext()){
+            tree2.add(iter2.next());
+        }
+        for(T data : tree1){
+            if(tree2.contains(data)){
+                r.add(data);
+            }
+        }
+        return r;
     }
 
     public int levelCount(int level) {

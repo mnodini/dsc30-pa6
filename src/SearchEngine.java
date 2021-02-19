@@ -18,6 +18,8 @@ import java.util.Scanner;
  */
 public class SearchEngine {
 
+    private static final int INTERSECTION_MIN = 2;
+
     /**
      * Populate BSTrees from a file
      * 
@@ -90,7 +92,7 @@ public class SearchEngine {
         String[] keys = query.toLowerCase().split(" ");
         LinkedList<String> documents = new LinkedList<>();
         LinkedList<String> temp;
-        if(keys.length >= 2){
+        if(keys.length >= INTERSECTION_MIN){
             //Add the contents of the documents from the first key
             try {
                 documents.addAll(searchTree.findDataList(keys[0]));
@@ -147,10 +149,6 @@ public class SearchEngine {
      * @param args command line arguments
      */
     public static void main(String[] args) {
-
-//        for(int i = 0; i < args.length; i++){
-//            System.out.println(args[i]);
-//        }
         // initialize search trees
         BSTree<String> movieTree = new BSTree<>();
         BSTree<String> studioTree = new BSTree<>();
@@ -162,17 +160,14 @@ public class SearchEngine {
         // process command line arguments
         String fileName = args[0];
         int searchKind = Integer.parseInt(args[1]);
-
         // populate search trees
         SearchEngine.populateSearchTrees(movieTree, studioTree, ratingTree, fileName);
         // choose the right tree to query
         String query = "";
-        for(int i = 2; i < args.length; i++){
+        for(int i = INTERSECTION_MIN; i < args.length; i++){
             query += args[i];
             query += " ";
         }
         SearchEngine.searchMyQuery(trees.get(searchKind),query);
-
-
     }
 }
